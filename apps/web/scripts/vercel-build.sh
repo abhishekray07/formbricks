@@ -27,5 +27,10 @@ else
   echo "==> Skipping seed (VERCEL_ENV=${VERCEL_ENV:-unset})"
 fi
 
+# Next 16's build pipeline stats apps/web/.env and ENOENTs when the file is missing.
+# On Vercel envs come from process.env, so the file content is irrelevant — only its
+# existence matters. Disabling output:"standalone" wasn't enough to bypass the stat.
+touch apps/web/.env
+
 echo "==> Building @formbricks/web"
 pnpm turbo run build --filter=@formbricks/web

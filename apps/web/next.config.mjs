@@ -44,6 +44,10 @@ const nextConfig = {
   basePath: process.env.BASE_PATH || undefined,
   output: process.env.VERCEL ? undefined : "standalone",
   poweredByHeader: false,
+  // Type-checking and lint belong in CI, not the Vercel deploy pipeline.
+  // The monorepo's TS check hangs/times out on Vercel build machines.
+  typescript: { ignoreBuildErrors: !!process.env.VERCEL },
+  eslint: { ignoreDuringBuilds: !!process.env.VERCEL },
   // Enable source maps only when uploading to Sentry (CI/production); skip for faster local builds
   productionBrowserSourceMaps: !!process.env.SENTRY_AUTH_TOKEN,
   serverExternalPackages: [

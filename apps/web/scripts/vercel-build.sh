@@ -27,5 +27,9 @@ else
   echo "==> Skipping seed (VERCEL_ENV=${VERCEL_ENV:-unset})"
 fi
 
+# Next.js's standalone output tracer stats apps/web/.env during build.
+# On Vercel envs come from process.env; create an empty placeholder so the stat call succeeds.
+touch apps/web/.env
+
 echo "==> Building @formbricks/web"
 pnpm turbo run build --filter=@formbricks/web

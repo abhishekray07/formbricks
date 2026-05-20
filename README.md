@@ -224,3 +224,5 @@ We currently do not offer Formbricks white-labeled. That means that we don't sel
 The Enterprise Edition allows us to fund the development of Formbricks sustainably. It guarantees that the free and open-source surveying infrastructure we're building will be around for decades to come.
 
 <a id="readme-de"></a>
+
+Opslane demo verification is ready.

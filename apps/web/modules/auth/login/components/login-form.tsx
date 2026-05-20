@@ -34,6 +34,7 @@ const ZLoginForm = z.object({
     }),
   totpCode: z.string().optional(),
   backupCode: z.string().optional(),
+  rememberMe: z.boolean().optional(),
 });
 
 type TLoginForm = z.infer<typeof ZLoginForm>;
@@ -90,6 +91,7 @@ export const LoginForm = ({
       password: "",
       totpCode: "",
       backupCode: "",
+      rememberMe: false,
     },
     resolver: zodResolver(ZLoginForm),
   });
@@ -240,6 +242,30 @@ export const LoginForm = ({
                             onChange={(password) => field.onChange(password)}
                           />
                           {error?.message && <FormError className="text-left">{error.message}</FormError>}
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <div className="ml-1 flex items-center">
+                          <input
+                            id="rememberMe"
+                            type="checkbox"
+                            checked={!!field.value}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            className="h-4 w-4 rounded border-slate-300 text-brand-dark focus:ring-brand-dark"
+                          />
+                          <label
+                            htmlFor="rememberMe"
+                            className="ml-2 text-xs text-slate-500 hover:text-brand-dark">
+                            Remember me on this device
+                          </label>
                         </div>
                       </FormControl>
                     </FormItem>

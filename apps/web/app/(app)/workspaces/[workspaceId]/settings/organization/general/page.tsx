@@ -1,3 +1,4 @@
+import { redirectBillingRoleFromRestrictedSettings } from "@/app/(app)/workspaces/[workspaceId]/settings/lib/redirect-billing-role";
 import { isInstanceAIConfigured } from "@/lib/ai/service";
 import {
   ENTERPRISE_LICENSE_REQUEST_FORM_URL,
@@ -8,7 +9,6 @@ import {
 import { getUser } from "@/lib/user/service";
 import { getTranslate } from "@/lingodotdev/server";
 import {
-  getIsAIDataAnalysisEnabled,
   getIsAISmartToolsEnabled,
   getIsMultiOrgEnabled,
   getWhiteLabelPermission,
@@ -22,12 +22,14 @@ import { getWorkspaceAuth } from "@/modules/workspaces/lib/utils";
 import packageJson from "@/package.json";
 import { SettingsCard } from "../../components/SettingsCard";
 import { AISettingsToggle } from "./components/AISettingsToggle";
+import { CreateOrganizationCard } from "./components/CreateOrganizationCard";
 import { DeleteOrganization } from "./components/DeleteOrganization";
 import { EditOrganizationNameForm } from "./components/EditOrganizationNameForm";
 import { SecurityListTip } from "./components/SecurityListTip";
 
-const Page = async (props: { params: Promise<{ workspaceId: string }> }) => {
+const Page = async (props: Readonly<{ params: Promise<{ workspaceId: string }> }>) => {
   const params = await props.params;
+  await redirectBillingRoleFromRestrictedSettings(params.workspaceId);
   const t = await getTranslate();
 
   const { session, currentUserMembership, organization, isOwner, isManager } = await getWorkspaceAuth(
@@ -36,14 +38,11 @@ const Page = async (props: { params: Promise<{ workspaceId: string }> }) => {
 
   const user = session?.user?.id ? await getUser(session.user.id) : null;
 
-  const [isMultiOrgEnabled, hasWhiteLabelPermission, hasAISmartToolsPermission, hasAIDataAnalysisPermission] =
-    await Promise.all([
-      getIsMultiOrgEnabled(),
-      getWhiteLabelPermission(organization.id),
-      getIsAISmartToolsEnabled(organization.id),
-      getIsAIDataAnalysisEnabled(organization.id),
-    ]);
-  const hasAIPermission = hasAISmartToolsPermission || hasAIDataAnalysisPermission;
+  const [isMultiOrgEnabled, hasWhiteLabelPermission, hasAIPermission] = await Promise.all([
+    getIsMultiOrgEnabled(),
+    getWhiteLabelPermission(organization.id),
+    getIsAISmartToolsEnabled(organization.id),
+  ]);
 
   const isDeleteDisabled = !isOwner || !isMultiOrgEnabled;
   const currentUserRole = currentUserMembership?.role;
@@ -90,15 +89,18 @@ const Page = async (props: { params: Promise<{ workspaceId: string }> }) => {
         enterpriseLicenseRequestFormUrl={ENTERPRISE_LICENSE_REQUEST_FORM_URL}
       />
       {isMultiOrgEnabled && (
-        <SettingsCard
-          title={t("workspace.settings.general.delete_organization")}
-          description={t("workspace.settings.general.delete_organization_description")}>
-          <DeleteOrganization
-            organization={organization}
-            isDeleteDisabled={isDeleteDisabled}
-            isUserOwner={currentUserRole === "owner"}
-          />
-        </SettingsCard>
+        <>
+          <SettingsCard
+            title={t("workspace.settings.general.delete_organization")}
+            description={t("workspace.settings.general.delete_organization_description")}>
+            <DeleteOrganization
+              organization={organization}
+              isDeleteDisabled={isDeleteDisabled}
+              isUserOwner={currentUserRole === "owner"}
+            />
+          </SettingsCard>
+          <CreateOrganizationCard />
+        </>
       )}
 
       <div className="space-y-2">

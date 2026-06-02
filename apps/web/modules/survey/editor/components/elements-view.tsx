@@ -50,6 +50,7 @@ import {
   findElementUsedInLogic,
   isUsedInQuota,
   isUsedInRecall,
+  scrollElementCardIntoView,
 } from "@/modules/survey/editor/lib/utils";
 import { getElementsFromBlocks } from "@/modules/survey/lib/client-utils";
 import { ConfirmationModal } from "@/modules/ui/components/confirmation-modal";
@@ -72,6 +73,7 @@ interface ElementsViewProps {
   isStorageConfigured: boolean;
   quotas: TSurveyQuota[];
   isExternalUrlsAllowed: boolean;
+  moveHiddenFieldsToSettingsTab?: boolean;
 }
 
 export const ElementsView = ({
@@ -91,6 +93,7 @@ export const ElementsView = ({
   isStorageConfigured = true,
   quotas,
   isExternalUrlsAllowed,
+  moveHiddenFieldsToSettingsTab = false,
 }: ElementsViewProps) => {
   const { t } = useTranslation();
   const [logicDeletionWarning, setLogicDeletionWarning] = React.useState<{
@@ -500,6 +503,7 @@ export const ElementsView = ({
 
     setActiveElementId(element.id);
     internalElementIdMap[element.id] = createId();
+    scrollElementCardIntoView(element.id);
   };
 
   const _addElementToBlock = (element: TSurveyElement, blockId: string, afterElementIdx: number) => {
@@ -525,6 +529,7 @@ export const ElementsView = ({
     setLocalSurvey(result.data);
     setActiveElementId(updatedElement.id);
     internalElementIdMap[updatedElement.id] = createId();
+    scrollElementCardIntoView(updatedElement.id);
   };
 
   const moveElementToBlock = (elementId: string, targetBlockId: string) => {
@@ -919,23 +924,25 @@ export const ElementsView = ({
         {!isCxMode && (
           <>
             <AddEndingCardButton localSurvey={localSurvey} addEndingCard={addEndingCard} />
-            <hr />
-
-            <HiddenFieldsCard
-              localSurvey={localSurvey}
-              setLocalSurvey={setLocalSurvey}
-              setActiveElementId={setActiveElementId}
-              activeElementId={activeElementId}
-              quotas={quotas}
-            />
-
-            <SurveyVariablesCard
-              localSurvey={localSurvey}
-              setLocalSurvey={setLocalSurvey}
-              activeElementId={activeElementId}
-              setActiveElementId={setActiveElementId}
-              quotas={quotas}
-            />
+            {!moveHiddenFieldsToSettingsTab && (
+              <>
+                <hr />
+                <HiddenFieldsCard
+                  localSurvey={localSurvey}
+                  setLocalSurvey={setLocalSurvey}
+                  setActiveElementId={setActiveElementId}
+                  activeElementId={activeElementId}
+                  quotas={quotas}
+                />
+                <SurveyVariablesCard
+                  localSurvey={localSurvey}
+                  setLocalSurvey={setLocalSurvey}
+                  activeElementId={activeElementId}
+                  setActiveElementId={setActiveElementId}
+                  quotas={quotas}
+                />
+              </>
+            )}
           </>
         )}
       </div>

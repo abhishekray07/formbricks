@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
-import { getConnectorsWithMappings } from "@/lib/connector/service";
+import { SettingsCard } from "@/app/(app)/workspaces/[workspaceId]/settings/components/SettingsCard";
 import { ENTERPRISE_LICENSE_REQUEST_FORM_URL, IS_FORMBRICKS_CLOUD } from "@/lib/constants";
+import { getFeedbackSourcesWithMappings } from "@/lib/feedback-source/service";
 import { getSurveys } from "@/lib/survey/service";
 import { getTranslate } from "@/lingodotdev/server";
 import { getFeedbackDirectoriesByWorkspaceId } from "@/modules/ee/feedback-directory/lib/feedback-directory";
-import { getIsUnifyFeedbackEnabled } from "@/modules/ee/license-check/lib/utils";
+import { getIsFeedbackDirectoriesEnabled } from "@/modules/ee/license-check/lib/utils";
 import { PageContentWrapper } from "@/modules/ui/components/page-content-wrapper";
+import { PageHeader } from "@/modules/ui/components/page-header";
 import { UpgradePrompt } from "@/modules/ui/components/upgrade-prompt";
 import { getWorkspaceAuth } from "@/modules/workspaces/lib/utils";
-import { ConnectorsSection } from "./components/connectors-page-client";
+import { FeedbackSourcesSection } from "./components/feedback-sources-page-client";
 import { transformToUnifySurvey } from "./lib";
 
 export const WorkspaceFeedbackSourcesPage = async (
@@ -33,19 +35,23 @@ export const WorkspaceFeedbackSourcesPage = async (
   }
 
   const hasAccess = isOwner || isManager || hasReadAccess || hasReadWriteAccess || hasManageAccess;
+  const pageTitle = t("workspace.unify.feedback_sources");
   if (!hasAccess) {
     return notFound();
   }
 
-  const isUnifyFeedbackAllowed = await getIsUnifyFeedbackEnabled(organization.id);
-  if (!isUnifyFeedbackAllowed) {
+  const isFeedbackDirectoriesAllowed = await getIsFeedbackDirectoriesEnabled(organization.id);
+  if (!isFeedbackDirectoriesAllowed) {
     return (
       <PageContentWrapper>
-        <div className="flex items-center justify-center">
+        <PageHeader pageTitle={pageTitle} />
+        <SettingsCard
+          title={t("workspace.unify.feedback_sources")}
+          description={t("workspace.unify.feedback_sources_settings_description")}>
           <UpgradePrompt
             title={t("workspace.unify.upgrade_prompt_title")}
             description={t("workspace.unify.upgrade_prompt_description")}
-            feature="unify-feedback"
+            feature="feedback-directories"
             buttons={[
               {
                 text: IS_FORMBRICKS_CLOUD ? t("common.upgrade_plan") : t("common.request_trial_license"),
@@ -61,13 +67,13 @@ export const WorkspaceFeedbackSourcesPage = async (
               },
             ]}
           />
-        </div>
+        </SettingsCard>
       </PageContentWrapper>
     );
   }
 
-  const [connectors, surveys, directories] = await Promise.all([
-    getConnectorsWithMappings(params.workspaceId),
+  const [feedbackSources, surveys, directories] = await Promise.all([
+    getFeedbackSourcesWithMappings(params.workspaceId),
     getSurveys(params.workspaceId),
     getFeedbackDirectoriesByWorkspaceId(params.workspaceId),
   ]);
@@ -75,9 +81,9 @@ export const WorkspaceFeedbackSourcesPage = async (
   const unifySurveys = surveys.map(transformToUnifySurvey);
 
   return (
-    <ConnectorsSection
+    <FeedbackSourcesSection
       workspaceId={params.workspaceId}
-      initialConnectors={connectors}
+      initialFeedbackSources={feedbackSources}
       initialSurveys={unifySurveys}
       directories={directories}
       isReadOnly={isReadOnly}

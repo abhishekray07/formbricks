@@ -436,17 +436,15 @@ export const PricingTable = ({
           <Alert variant="info" className="max-w-4xl">
             <AlertTitle>{t("workspace.settings.billing.pending_plan_change_title")}</AlertTitle>
             <AlertDescription>
-              {t("workspace.settings.billing.pending_plan_change_description")
-                .replace("{{plan}}", getCurrentCloudPlanLabel(pendingChange.targetPlan, t))
-                .replace(
-                  "{{date}}",
-                  formatDateForDisplay(new Date(pendingChange.effectiveAt), locale, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    timeZone: "UTC",
-                  })
-                )}
+              {t("workspace.settings.billing.pending_plan_change_description", {
+                plan: getCurrentCloudPlanLabel(pendingChange.targetPlan, t),
+                date: formatDateForDisplay(new Date(pendingChange.effectiveAt), locale, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "UTC",
+                }),
+              })}
             </AlertDescription>
             {hasBillingRights && (
               <AlertButton onClick={() => void undoPendingChange()} loading={isPlanActionPending === "undo"}>
@@ -457,7 +455,7 @@ export const PricingTable = ({
         )}
 
         {isStripeSetupIncomplete && hasBillingRights && (
-          <Alert variant="warning">
+          <Alert variant="warning" className="max-w-4xl">
             <AlertTitle>{t("workspace.settings.billing.stripe_setup_incomplete")}</AlertTitle>
             <AlertDescription>
               {t("workspace.settings.billing.stripe_setup_incomplete_description")}
@@ -469,7 +467,7 @@ export const PricingTable = ({
         )}
 
         {currentCloudPlan === "custom" && (
-          <Alert>
+          <Alert className="max-w-4xl">
             <AlertTitle>{t("workspace.settings.billing.custom_plan_title")}</AlertTitle>
             <AlertDescription>{t("workspace.settings.billing.custom_plan_description")}</AlertDescription>
           </Alert>
@@ -658,7 +656,7 @@ export const PricingTable = ({
                         <ul className="space-y-3">
                           {planCard.features.map((feature) => (
                             <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
-                              <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                              <CheckIcon className="mt-0.5 size-4 shrink-0 text-slate-500" />
                               <span>{feature}</span>
                             </li>
                           ))}

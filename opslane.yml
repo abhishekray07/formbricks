@@ -19,6 +19,8 @@ env:
   CUBEJS_API_URL: http://localhost:4000
   HUB_API_URL: http://localhost:3000
   HUB_API_KEY: dummy-key
+  EMAIL_VERIFICATION_DISABLED: "1"
+  PASSWORD_RESET_DISABLED: "1"
 verify_setup:
   instructions: |
     Fresh self-hosted Formbricks instance with no seeded users. Start at

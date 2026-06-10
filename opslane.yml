@@ -1,0 +1,34 @@
+port: 3000
+dockerfile: apps/web/Dockerfile
+services: [postgres, redis, smtp]
+health_path: /api/v2/health
+env:
+  NODE_ENV: production
+  WEBAPP_URL: http://localhost:3000
+  NEXTAUTH_URL: http://localhost:3000
+  NEXTAUTH_SECRET: 7ec9ac7ec5a2f696bdb22985d8759b113dfcf026ba8d6d311f8e6365fb7c9050
+  ENCRYPTION_KEY: aa9cb7294ae7f0c65a93a5d51ac82794b4b75a4c05cd072f7f38b70c3510f478
+  CRON_SECRET: 7465c2b8bd2b03e01d3c393ee4f3b669988b0209b0b1d18e9930762aa5817c0c
+  CUBEJS_API_SECRET: 3f5f01e0238bcb5819297bbab193117491244509b8a5477864d29ecda8e66446
+  DATABASE_URL: postgresql://app:app@pg:5432/app?schema=public
+  REDIS_URL: redis://redis:6379
+  MAIL_FROM: noreply@formbricks.local
+  SMTP_HOST: smtp
+  SMTP_PORT: "2500"
+  SMTP_SECURE_ENABLED: "0"
+  CUBEJS_API_URL: http://localhost:4000
+  HUB_API_URL: http://localhost:3000
+  HUB_API_KEY: dummy-key
+verify_setup:
+  instructions: |
+    Fresh self-hosted Formbricks instance with no seeded users. Start at
+    /auth/signup and register a new account (e.g. verify@opslane.dev with a
+    strong password) — email verification is not enforced on a fresh
+    self-hosted boot, so sign-up completes immediately. Then create the first
+    organization/project when prompted before exercising acceptance criteria.
+    The container self-migrates on boot via its start script.
+notes: |
+  Formbricks (Next.js monorepo). Dockerfile-first: apps/web/Dockerfile builds
+  the production web app on port 3000; the image start script runs database
+  migrations before serving. Recipe aliases: postgres at pg:5432 (app/app,
+  database `app`), redis at redis:6379, smtp at smtp:2500 (TLS off).

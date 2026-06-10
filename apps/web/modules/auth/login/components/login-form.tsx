@@ -162,7 +162,7 @@ export const LoginForm = ({
       return t("auth.login.enter_your_two_factor_authentication_code");
     }
 
-    return t("auth.login.login_to_your_account");
+    return "Welcome back";
   }, [t, totpBackup, totpLogin]);
 
   const TwoFactorComponent = useMemo(() => {

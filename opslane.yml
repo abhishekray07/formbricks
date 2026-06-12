@@ -27,7 +27,6 @@ seed: |
   node packages/database/dist/scripts/apply-migrations.js
   node -e '
     const { PrismaClient } = require("@prisma/client");
-    const bcrypt = require("bcryptjs");
     const prisma = new PrismaClient();
     (async () => {
       const org = await prisma.organization.upsert({
@@ -40,7 +39,9 @@ seed: |
         update: {},
         create: { organizationId: org.id, limits: { workspaces: 3, monthly: { responses: 1500 } }, stripeCustomerId: null, usageCycleAnchor: new Date() },
       });
-      const hash = bcrypt.hashSync("Password#123", 10);
+      // bcrypt("Password#123", 10) precomputed: the standalone image bundles
+      // bcryptjs inside webpack chunks, so it is not requirable from node -e.
+      const hash = "$2y$10$NS3qcQKgMgnVPYrdKLkQVuPFdULCgP5Oja/fTSQ8NpfjFgCqeaE/y";
       await prisma.user.upsert({
         where: { email: "admin@formbricks.com" },
         update: {},

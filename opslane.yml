@@ -21,14 +21,52 @@ env:
   HUB_API_KEY: dummy-key
   EMAIL_VERIFICATION_DISABLED: "1"
   PASSWORD_RESET_DISABLED: "1"
+seed: |
+  set -e
+  cd /home/nextjs
+  node packages/database/dist/scripts/apply-migrations.js
+  node -e '
+    const { PrismaClient } = require("@prisma/client");
+    const bcrypt = require("bcryptjs");
+    const prisma = new PrismaClient();
+    (async () => {
+      const org = await prisma.organization.upsert({
+        where: { id: "clseedorg0000000000000" },
+        update: {},
+        create: { id: "clseedorg0000000000000", name: "Opslane Organization" },
+      });
+      await prisma.organizationBilling.upsert({
+        where: { organizationId: org.id },
+        update: {},
+        create: { organizationId: org.id, limits: { workspaces: 3, monthly: { responses: 1500 } }, stripeCustomerId: null, usageCycleAnchor: new Date() },
+      });
+      const hash = bcrypt.hashSync("Password#123", 10);
+      await prisma.user.upsert({
+        where: { email: "admin@formbricks.com" },
+        update: {},
+        create: { name: "Opslane Admin", email: "admin@formbricks.com", password: hash, emailVerified: new Date(), memberships: { create: { organizationId: org.id, role: "owner", accepted: true } } },
+      });
+      const ws = await prisma.workspace.upsert({
+        where: { id: "clseedworkspace000000000" },
+        update: {},
+        create: { id: "clseedworkspace000000000", name: "Opslane Workspace", organizationId: org.id },
+      });
+      await prisma.survey.upsert({
+        where: { id: "clseedsurveycsat000000" },
+        update: {},
+        create: { id: "clseedsurveycsat000000", name: "Opslane Sample Survey", workspaceId: ws.id, status: "inProgress", type: "link", blocks: [{ id: "opslaneblockmain00001", name: "Main Block", elements: [{ id: "opslaneq1opentext0001", type: "openText", headline: { default: "How can we improve?" }, required: false }] }] },
+      });
+      console.log("SEED_OK admin@formbricks.com workspace=" + ws.id);
+      await prisma.$disconnect();
+    })().catch((e) => { console.error("SEED_FAIL: " + (e && e.message || e)); process.exit(1); });
+  '
 verify_setup:
   instructions: |
-    Fresh self-hosted Formbricks instance with no seeded users. Start at
-    /auth/signup and register a new account (e.g. verify@opslane.dev with a
-    strong password) — email verification is not enforced on a fresh
-    self-hosted boot, so sign-up completes immediately. Then create the first
-    organization/project when prompted before exercising acceptance criteria.
-    The container self-migrates on boot via its start script.
+    Log in as admin@formbricks.com / Password#123 (seeded at boot via the
+    schema mirrored from the app's own packages/database seed script: admin
+    user, organization, workspace, and one in-progress sample survey named
+    "Opslane Sample Survey"). No sign-up or onboarding is needed — after
+    login you land in the seeded workspace. Verify through the browser UI.
 notes: |
   Formbricks (Next.js monorepo). Dockerfile-first: apps/web/Dockerfile builds
   the production web app on port 3000; the image start script runs database

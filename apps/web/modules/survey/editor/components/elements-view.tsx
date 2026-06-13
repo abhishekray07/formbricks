@@ -731,7 +731,8 @@ export const ElementsView = ({
       const currentInvalidSet = new Set(invalidElements);
       let hasChanges = false;
 
-      // Validate each element
+      // Live re-validation: clear errors as elements become valid (including
+      // drafts), but don't flag freshly added drafts — save/publish does that.
       elements.forEach((element) => {
         const isValid = validateElement(element, surveyLanguages);
         if (isValid) {
@@ -739,7 +740,7 @@ export const ElementsView = ({
             currentInvalidSet.delete(element.id);
             hasChanges = true;
           }
-        } else if (!currentInvalidSet.has(element.id)) {
+        } else if (!element.isDraft && !currentInvalidSet.has(element.id)) {
           currentInvalidSet.add(element.id);
           hasChanges = true;
         }

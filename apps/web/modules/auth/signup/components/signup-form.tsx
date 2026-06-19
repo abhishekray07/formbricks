@@ -82,6 +82,7 @@ export const SignupForm = ({
   const [turnstileToken, setTurnstileToken] = useState<string>();
   const [subscribeToSecurityUpdates, setSubscribeToSecurityUpdates] = useState(false);
   const [subscribeToProductUpdates, setSubscribeToProductUpdates] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const turnstile = useTurnstile();
 
@@ -207,6 +208,17 @@ export const SignupForm = ({
                       </FormItem>
                     )}
                   />
+                  <div className="w-full">
+                    <Input
+                      data-testid="signup-phone"
+                      type="tel"
+                      name="phone"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="Phone number (optional)"
+                      className="bg-white"
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="password"
